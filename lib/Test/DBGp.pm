@@ -7,6 +7,27 @@ use warnings;
 
 Test::DBGp - Test helpers for debuggers using the DBGp protocol
 
+=head1 SYNOPSIS
+
+    use Test::DBGp;
+
+    dbgp_listen();
+
+    # start program under debugger
+
+    dbgp_wait_connection($EXPECTED_APPID);
+
+    dbgp_command_is(['step_into'], {
+        reason      => 'ok',
+        status      => 'break',
+        command     => 'step_into',
+    });
+
+=head1 DESCRIPTION
+
+Various helpers to write tests for modules dealing with the DBGp
+debugger protocol.
+
 =cut
 
 our $VERSION = '0.01';
@@ -152,3 +173,18 @@ sub dbgp_command_is {
 }
 
 1;
+
+__END__
+
+=head1 AUTHOR
+
+Mattia Barbon <mbarbon@cpan.org>
+
+=head1 LICENSE
+
+Copyright (c) 2015 Mattia Barbon. All rights reserved.
+
+This library is free software; you can redistribute it and/or modify it
+under the same terms as Perl itself.
+
+=cut
