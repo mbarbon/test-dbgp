@@ -34,6 +34,8 @@ our $VERSION = '0.01';
 
 use Test::Differences;
 use IO::Socket;
+use File::Spec::Functions;
+use Cwd;
 
 require Exporter; *import = \&Exporter::import;
 
@@ -44,13 +46,14 @@ our @EXPORT = qw(
 
     dbgp_listen
     dbgp_listening_port
+    dbgp_listening_path
     dbgp_stop_listening
     dbgp_wait_connection
 
     dbgp_send_command
 );
 
-my ($LISTEN, $CLIENT, $INIT, $SEQ, $PORT);
+my ($LISTEN, $CLIENT, $INIT, $SEQ, $PORT, $PATH);
 
 sub dbgp_response_cmp {
     local $Test::Builder::Level = $Test::Builder::Level + 1;
@@ -89,6 +92,14 @@ sub _extract_command_data {
 }
 
 sub dbgp_listen {
+    if ($^O eq 'MSWin32') {
+        dbgp_listen_tcp();
+    } else {
+        dbgp_listen_unix();
+    }
+}
+
+sub dbgp_listen_tcp {
     return if $LISTEN;
 
     for my $port (!$PORT ? (17000 .. 19000) : ($PORT)) {
@@ -102,10 +113,29 @@ sub dbgp_listen {
         next unless $LISTEN;
 
         $PORT = $port;
+        $PATH = undef;
         last;
     }
 
     die "Unable to open a listening socket in the 17000 - 19000 port range"
+        unless $LISTEN;
+}
+
+sub dbgp_listen_unix {
+    return if $LISTEN;
+
+    my $path = File::Spec::Functions::rel2abs('dbgp.sock', Cwd::getcwd());
+    unlink $path if -S $path;
+    return if -e $path;
+
+    $LISTEN = IO::Socket::UNIX->new(
+        Local   => $path,
+        Listen  => 1,
+    );
+    $PORT = undef;
+    $PATH = $path;
+
+    die "Unable to open a listening socket on '$path'"
         unless $LISTEN;
 }
 
@@ -115,6 +145,7 @@ sub dbgp_stop_listening {
 }
 
 sub dbgp_listening_port { $PORT }
+sub dbgp_listening_path { $PATH }
 
 sub dbgp_wait_connection {
     my ($pid, $reject) = @_;
