@@ -1,5 +1,9 @@
 Revision history for Test-DBGp
 
+0.02      2015-12-15 20:13:39 CET
+
+    - Default to Unix-domain sockets on non-Windows platforms
+
 0.01      2015-12-12 15:52:48 CET
 
     - First public release
