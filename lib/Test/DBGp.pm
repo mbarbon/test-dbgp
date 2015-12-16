@@ -127,7 +127,7 @@ sub dbgp_listen_unix {
 
     my $path = File::Spec::Functions::rel2abs('dbgp.sock', Cwd::getcwd());
 
-    if (length($path) >= 10) { # arbitrary, should be low enough
+    if (length($path) >= 90) { # arbitrary, should be low enough
         my $tempdir = File::Temp::tempdir(CLEANUP => 1);
         $path = File::Spec::Functions::rel2abs('dbgp.sock', $tempdir);
     }
