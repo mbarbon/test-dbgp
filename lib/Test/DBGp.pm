@@ -125,11 +125,14 @@ sub dbgp_listen_tcp {
 sub dbgp_listen_unix {
     return if $LISTEN;
 
-    my $path = File::Spec::Functions::rel2abs('dbgp.sock', Cwd::getcwd());
+    my $path = $PATH;
+    if (!$path) {
+        $path = File::Spec::Functions::rel2abs('dbgp.sock', Cwd::getcwd());
 
-    if (length($path) >= 90) { # arbitrary, should be low enough
-        my $tempdir = File::Temp::tempdir(CLEANUP => 1);
-        $path = File::Spec::Functions::rel2abs('dbgp.sock', $tempdir);
+        if (length($path) >= 90) { # arbitrary, should be low enough
+            my $tempdir = File::Temp::tempdir(CLEANUP => 1);
+            $path = File::Spec::Functions::rel2abs('dbgp.sock', $tempdir);
+        }
     }
     unlink $path if -S $path;
     return if -e $path;
