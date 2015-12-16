@@ -35,6 +35,7 @@ our $VERSION = '0.02';
 use Test::Differences;
 use IO::Socket;
 use File::Spec::Functions;
+use File::Temp;
 use Cwd;
 
 require Exporter; *import = \&Exporter::import;
@@ -125,6 +126,11 @@ sub dbgp_listen_unix {
     return if $LISTEN;
 
     my $path = File::Spec::Functions::rel2abs('dbgp.sock', Cwd::getcwd());
+
+    if (length($path) >= 10) { # arbitrary, should be low enough
+        my $tempdir = File::Temp::tempdir(CLEANUP => 1);
+        $path = File::Spec::Functions::rel2abs('dbgp.sock', $tempdir);
+    }
     unlink $path if -S $path;
     return if -e $path;
 
