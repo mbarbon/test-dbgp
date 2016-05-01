@@ -1,5 +1,9 @@
 Revision history for Test-DBGp
 
+0.05      2016-05-01 19:37:08 CEST
+
+    - Add helper function to compare parsed responses
+
 0.04      2015-12-16 19:58:52 CET
 
     - Fix thinko in Unix-domain socket reconnection logic
