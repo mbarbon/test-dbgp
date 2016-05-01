@@ -42,6 +42,7 @@ require Exporter; *import = \&Exporter::import;
 
 our @EXPORT = qw(
     dbgp_response_cmp
+    dbgp_parsed_response_cmp
     dbgp_init_is
     dbgp_command_is
 
@@ -63,6 +64,15 @@ sub dbgp_response_cmp {
 
     my ($xml, $expected) = @_;
     my $res = DBGp::Client::Parser::parse($xml);
+    my $cmp = _extract_command_data($res, $expected);
+
+    eq_or_diff($cmp, $expected);
+}
+
+sub dbgp_parsed_response_cmp {
+    local $Test::Builder::Level = $Test::Builder::Level + 1;
+
+    my ($res, $expected) = @_;
     my $cmp = _extract_command_data($res, $expected);
 
     eq_or_diff($cmp, $expected);
