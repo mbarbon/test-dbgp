@@ -84,6 +84,7 @@ sub _extract_command_data {
     if (!ref $expected) {
         return $res;
     } elsif (ref $expected eq 'HASH') {
+        return $res if !defined $res;
         return {
             map {
                 $_ => _extract_command_data($res->$_, $expected->{$_})
