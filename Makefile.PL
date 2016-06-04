@@ -19,7 +19,7 @@ WriteMakefile(
     ABSTRACT_FROM     => "lib/Test/DBGp.pm",
     AUTHOR            => 'Mattia Barbon <mbarbon@cpan.org>',
     PREREQ_PM         => {
-        'Test::Differences'         => 0,
+        'Test::Differences'         => '0.63',
         'File::Temp'                => 0,
     },
     ( $mm_ver >= 6.48 ?     ( MIN_PERL_VERSION  => 5.006 ) :
