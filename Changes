@@ -1,5 +1,9 @@
 Revision history for Test-DBGp
 
+0.06      2016-06-04 16:01:54 CEST
+
+    - Bump Test::Differences dependency
+
 0.05      2016-05-01 19:37:08 CEST
 
     - Add helper function to compare parsed responses

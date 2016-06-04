@@ -30,7 +30,7 @@ debugger protocol.
 
 =cut
 
-our $VERSION = '0.05';
+our $VERSION = '0.06';
 
 use Test::Differences;
 use IO::Socket;
