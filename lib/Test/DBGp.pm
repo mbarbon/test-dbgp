@@ -53,9 +53,14 @@ our @EXPORT = qw(
     dbgp_wait_connection
 
     dbgp_send_command
+
+    dbgp_reset_output
+    dbgp_stdout_is
+    dbgp_stderr_is
 );
 
 my ($LISTEN, $CLIENT, $INIT, $SEQ, $PORT, $PATH);
+my ($STDOUT, $STDERR) = ('', '');
 
 sub dbgp_response_cmp {
     local $Test::Builder::Level = $Test::Builder::Level + 1;
@@ -167,6 +172,18 @@ sub dbgp_stop_listening {
 sub dbgp_listening_port { $PORT }
 sub dbgp_listening_path { $PATH }
 
+sub _append_output {
+    my ($event) = @_;
+
+    if ($event->type eq 'stdout') {
+        $STDOUT .= $event->content;
+    } elsif ($event->type eq 'stderr') {
+        $STDERR .= $event->content;
+    } else {
+        die "Unknown event type ", $event->type
+    }
+}
+
 sub dbgp_wait_connection {
     my ($pid, $reject) = @_;
     my $conn = $LISTEN->accept;
@@ -195,13 +212,38 @@ sub dbgp_send_command {
     my ($command, @args) = @_;
 
     $CLIENT->put_line($command, '-i', ++$SEQ, @args);
-    my $res = DBGp::Client::Parser::parse($CLIENT->get_line);
+    for (;;) {
+        my $res = DBGp::Client::Parser::parse($CLIENT->get_line);
 
-    die 'Mismatched transaction IDs: got ', $res->transaction_id,
-            ' expected ', $SEQ
-        if $res && $res->transaction_id != $SEQ;
+        if ($res && $res->is_stream) {
+            _append_output($res);
+            next;
+        }
 
-    return $res;
+        die 'Mismatched transaction IDs: got ', $res->transaction_id,
+                ' expected ', $SEQ
+            if $res && $res->transaction_id != $SEQ;
+
+        return $res;
+    }
+}
+
+sub dbgp_reset_output {
+    $STDOUT = $STDERR = '';
+}
+
+sub dbgp_stdout_is {
+    local $Test::Builder::Level = $Test::Builder::Level + 1;
+    my ($expected) = @_;
+
+    eq_or_diff($STDOUT, $expected);
+}
+
+sub dbgp_stderr_is {
+    local $Test::Builder::Level = $Test::Builder::Level + 1;
+    my ($expected) = @_;
+
+    eq_or_diff($STDERR, $expected);
 }
 
 sub dbgp_init_is {
